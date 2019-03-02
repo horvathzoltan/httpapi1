@@ -62,15 +62,25 @@ FORMS += \
 #else: unix:!android: target.path = /opt/$${TARGET}/bin
 #!isEmpty(target.path): INSTALLS += targe
 
-#wiringPI a GPIO kezeléséhez
-LIBS += -L/usr/local/lib -lwiringPi
-LIBS += -L/usr/local/lib -lwiringPiDev
+# if defined(Q_PROCESSOR_ARM) DEFINES += RPI
+
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android:{
-    target.path = /home/pi/$${TARGET}/bin
+contains(QMAKE_HOST.arch, arm.*):{
+        DEFINES += RPI
+#wiringPI a GPIO kezeléséhez
+LIBS += -L/usr/local/lib -lwiringPi
+LIBS += -L/usr/local/lib -lwiringPiDev
+        target.path = /home/pi/$${TARGET}/bin
+    }else{
+        DEFINES += NRPI
+    }
+
+
 # definíció a feltételes fordításhoz
-    DEFINES += RPI
+    # DEFINES += RPI=true
 }
 !isEmpty(target.path): INSTALLS += target

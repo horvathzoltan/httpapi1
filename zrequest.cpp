@@ -42,7 +42,7 @@ zRequest::zRequest(QString r)
             {
                 this->url = QUrl(URI);                
                 this->urlparams = QUrlQuery(url);
-            }
+            }            
         }
         else
         {

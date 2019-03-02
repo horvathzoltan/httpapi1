@@ -8,10 +8,11 @@ zActionTask::zActionTask()
     // zlog.trace(QStringLiteral("MyTask()"));
 }
 
-void zActionTask::setActionFn(const zactionFn& a, const QUrlQuery& p)
+void zActionTask::setActionFn(const zactionFn& a, const QUrlQuery& p, const QByteArray& c)
 {
     this->aFn = a;
     this->aParam = p;
+    this->content = c;
 }
 
 // When the thread pool kicks up
@@ -34,7 +35,7 @@ void zActionTask::run()
 //        iNumber += 1;
 //    }
 
-    zActionResult eredmeny = this->aFn(aParam);
+    zActionResult eredmeny = this->aFn(aParam, content);
 
     //zlog.trace(QStringLiteral("Task done"));
     emit Result(eredmeny);

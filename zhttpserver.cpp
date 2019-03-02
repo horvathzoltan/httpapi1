@@ -50,8 +50,8 @@ void zHTTPserver::txRx()
     if(ac != nullptr)
     {
         rs.setStatus(zResponse::statusCode::OK);
-        //QString q = r.url.query();
-        auto eredmeny = ac->fn(r.urlparams);
+        //QString q = r.url.query();               
+        auto eredmeny = ac->fn(r.urlparams, r.content);
         rs.addBody(eredmeny);
     }
     else

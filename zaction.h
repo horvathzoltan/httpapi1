@@ -18,7 +18,7 @@ struct zActionResult{
 };
 //Q_DECLARE_METATYPE(zActionResult);
 
-typedef zActionResult (*zactionFn)(const QUrlQuery&);
+typedef zActionResult (*zactionFn)(const QUrlQuery&, const QByteArray&);
 
 class zAction
 {

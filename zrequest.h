@@ -34,6 +34,7 @@ public:
     QUrl url;
     QUrlQuery urlparams;
     QMap<QString, QString> headerFields;
+    QByteArray content;
 
     QString toString();
 };

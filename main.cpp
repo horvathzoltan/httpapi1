@@ -64,6 +64,13 @@ int main(int argc, char *argv[])
     server.setHostAddress(QHostAddress::Any, 8080);
     server.addAction(zRequest::Method::GET, "/dolgoz1", &doWork::dolgoz1);
     server.addAction(zRequest::Method::GET, "/dolgoz2", &doWork::dolgoz2);        
+    server.addAction(zRequest::Method::GET, "/getNext", &doWork::getNextNumber);
+    server.addAction(zRequest::Method::GET, "/styro1/translation/getheaderuc", &doWork::getHeaderUCtr1);
+    // styro1
+    server.addAction(zRequest::Method::GET, "/styro1/translation/getmainpagetr1", &doWork::getMainPagetr1);
+    //testconnection
+    server.addAction(zRequest::Method::GET, "/styro1/login/active", &doWork::testconnection);
+    server.addAction(zRequest::Method::POST, "/styro1/login/login", &doWork::login);
     server.start();
 
     return a.exec();

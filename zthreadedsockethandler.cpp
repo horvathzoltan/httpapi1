@@ -55,10 +55,34 @@ void zThreadedSocketHandler::disconnected()
 
 void zThreadedSocketHandler::readyRead()
 {
+    /*
+     *
+I've tried this myself now with a very small example code and it works as it should be!? here my code:
+@
+QTcpServer *server = new QTcpServer;
+connect(server, &QTcpServer::newConnection, [=]{
+QTcpSocket *client = server->nextPendingConnection();
+qDebug() << client->peerAddress() << client->peerPort();
+connect(client, &QTcpSocket::readyRead, [=]{
+qDebug() << client->bytesAvailable() << client->readAll();
+});
+});
+qDebug() << server->listen(QHostAddress::LocalHost, 80);
+@
+I just print everything to the debug console.
+example output send from chrome/postman extension as post data
+@
+*/
     QByteArray ba;
     ba = socket->readAll();
 
+//    while(socket->bytesAvailable()) {
+//    ba.append(socket->readAll());
+//    }
+
     zRequest r(ba);
+
+    //QByteArray ba2 = socket->readAll();
 
     trace(r.toString());
 
@@ -76,7 +100,7 @@ void zThreadedSocketHandler::readyRead()
         //QString q_str = r.url.query();
 
 
-        mytask->setActionFn(action->fn, r.urlparams);
+        mytask->setActionFn(action->fn, r.urlparams, r.content);
         mytask->setAutoDelete(true);
 
         // sorba állítjuk
@@ -87,6 +111,7 @@ void zThreadedSocketHandler::readyRead()
     else
     {
         zResponse rs;
+
         rs.setStatus(zResponse::statusCode::NotFound);
         rs.addHeaderField(zResponse::headerField::Server, server->serverName());
         sendResponse(rs);
