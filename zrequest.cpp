@@ -42,6 +42,7 @@ zRequest::zRequest(QString r)
             {
                 this->url = QUrl(URI);                
                 this->urlparams = QUrlQuery(url);
+                this->content = lines.last().toUtf8();
             }            
         }
         else

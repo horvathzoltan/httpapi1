@@ -74,16 +74,26 @@ example output send from chrome/postman extension as post data
 @
 */
     QByteArray ba;
-    ba = socket->readAll();
+//    ba = socket->readAll();
 
-//    while(socket->bytesAvailable()) {
-//    ba.append(socket->readAll());
-//    }
+    while(socket->bytesAvailable()) {
+        ba.append(socket->readAll());
+        }
 
+    // ha request jön, fejéccel, meg minden, akkor kell új request, ha nem, akkor valószínűleg
+    // content jön egy korábbi actionhöz vagy requesthez
+    // nemmellesleg a contetnt jöhet egyben is
     zRequest r(ba);
 
-    //QByteArray ba2 = socket->readAll();
+//    QByteArray ba2;
 
+//    while(socket->bytesAvailable()) {
+//        ba2.append(socket->readAll());
+//        }
+
+    if(r.method == zRequest::Method::POST){
+        trace(zRequest::Method::POST);
+    }
     trace(r.toString());
 
     //auto action = zActionHelper::find(this->server->actions, r);
@@ -96,9 +106,11 @@ example output send from chrome/postman extension as post data
         // a task csak az actiont végrehajtja és az eredményt közli
         // ez bekerül egy response-ba, amit a TaskResult visszaad
 
+        // ha az action minden byte-ja megjött, akkor ok, ha nem, akkor egy újabb readtoready-ben fog jönni hozzá.
+        // ha ok, akkor lesz task, ha nem, akkor wait lesz.
+
         zActionTask *mytask = new zActionTask();
         //QString q_str = r.url.query();
-
 
         mytask->setActionFn(action->fn, r.urlparams, r.content);
         mytask->setAutoDelete(true);

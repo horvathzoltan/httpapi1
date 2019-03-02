@@ -154,6 +154,23 @@ zActionResult doWork::testconnection(const QUrlQuery& param, const QByteArray& c
 */
 zActionResult doWork::login(const QUrlQuery& param, const QByteArray& content)
 {
+    if(!content.isEmpty())
+    {
+        QJsonDocument d = QJsonDocument::fromJson(content);
+        QJsonObject c = d.object();
+
+        QString u, p;
+
+        if(c.contains("username") && c.contains("password"))
+        {
+            p = c.value("username").toString();
+            u = c["password"].toString();
+        }
+    }
+    else{
+        zlog.message("empty");
+    }
+
     QJsonObject j;
 
     j.insert("ErrorMessage", "");
