@@ -149,6 +149,7 @@ void zThreadedSocketHandler::trace(QString p1)
 }
 
 void zThreadedSocketHandler::startTask(const zRequest& r, const zAction action){
+    zlog.trace(QStringLiteral("TASK(%1)").arg(r.instance));
     zActionTask *mytask = new zActionTask();
     //QString q_str = r.url.query();
 

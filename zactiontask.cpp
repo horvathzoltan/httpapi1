@@ -26,7 +26,7 @@ void zActionTask::run()
 {
     // time consumer
 
-    //zlog.trace(QStringLiteral("Task started"));
+    zlog.trace(QStringLiteral("Task started"));
 
 
 //    int iNumber = 0;
@@ -37,7 +37,7 @@ void zActionTask::run()
 
     zActionResult eredmeny = this->aFn(aParam, content);
 
-    //zlog.trace(QStringLiteral("Task done"));
+    zlog.trace(QStringLiteral("Task done"));
     emit Result(eredmeny);
 }
 

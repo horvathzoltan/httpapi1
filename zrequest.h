@@ -39,10 +39,11 @@ public:
     QByteArray content;
     int content_length;
     int status;
+    int instance;
 
     QString toString();
 private:
-    int instance;
+
     static int instance_counter;
 };
 
