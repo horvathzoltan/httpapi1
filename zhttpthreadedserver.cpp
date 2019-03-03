@@ -39,10 +39,10 @@ void zHTTPThreadedServer::stop()
 
 void zHTTPThreadedServer::incomingConnection(qintptr socketDescriptor)
 {
+    zlog.trace("incoming:"+QString::number(socketDescriptor));
     // Amikor bejön egy connection, csinálunk egy klienst , ami amúgy nem kliens, inkább socket handler
-    zThreadedSocketHandler *client = new zThreadedSocketHandler(this);
+    auto *client = new zThreadedSocketHandler(this);
     client->setSocket(socketDescriptor);
-    //client->setActions(&this->actions);
     client->setServer(this);
 }
 

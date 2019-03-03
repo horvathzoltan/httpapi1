@@ -37,7 +37,8 @@ SOURCES += \
     zaction.cpp \
     zactionhelper.cpp \
     zactiontask.cpp \
-    zlogicexception.cpp
+    zlogicexception.cpp \
+    zstringhelper.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -52,7 +53,8 @@ HEADERS += \
     zaction.h \
     zactionhelper.h \
     globals.h \
-    zlogicexception.h
+    zlogicexception.h \
+    zstringhelper.h
 
 FORMS += \
         mainwindow.ui

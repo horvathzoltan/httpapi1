@@ -35,7 +35,7 @@ public:
 
     QString method;
     QString path;
-    zactionFn fn;
+    zactionFn fn;    
 };
 
 

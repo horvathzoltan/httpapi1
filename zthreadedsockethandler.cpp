@@ -22,14 +22,13 @@ void zThreadedSocketHandler::setSocket(qintptr descriptor)
 {
     // make a new socket
     socket = new QTcpSocket(this);
+    socket->setSocketDescriptor(descriptor);
 
     connect(socket, SIGNAL(connected()), this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-    socket->setSocketDescriptor(descriptor);
-
-    //trace("created");
+    trace("socket created:"+QString::number(descriptor));
 }
 
 
@@ -54,81 +53,72 @@ void zThreadedSocketHandler::disconnected()
 // de mi a taskot a poolból vesszük és haszáljuk fel
 
 void zThreadedSocketHandler::readyRead()
-{
-    /*
-     *
-I've tried this myself now with a very small example code and it works as it should be!? here my code:
-@
-QTcpServer *server = new QTcpServer;
-connect(server, &QTcpServer::newConnection, [=]{
-QTcpSocket *client = server->nextPendingConnection();
-qDebug() << client->peerAddress() << client->peerPort();
-connect(client, &QTcpSocket::readyRead, [=]{
-qDebug() << client->bytesAvailable() << client->readAll();
-});
-});
-qDebug() << server->listen(QHostAddress::LocalHost, 80);
-@
-I just print everything to the debug console.
-example output send from chrome/postman extension as post data
-@
-*/
+{  
     QByteArray ba;
-//    ba = socket->readAll();
+    auto descriptor = socket->socketDescriptor();
 
-    while(socket->bytesAvailable()) {
-        ba.append(socket->readAll());
-        }
+    ba = socket->readAll();
 
-    // ha request jön, fejéccel, meg minden, akkor kell új request, ha nem, akkor valószínűleg
-    // content jön egy korábbi actionhöz vagy requesthez
-    // nemmellesleg a contetnt jöhet egyben is
     zRequest r(ba);
 
-//    QByteArray ba2;
-
-//    while(socket->bytesAvailable()) {
-//        ba2.append(socket->readAll());
-//        }
-
-    if(r.method == zRequest::Method::POST){
-        trace(zRequest::Method::POST);
-    }
     trace(r.toString());
 
-    //auto action = zActionHelper::find(this->server->actions, r);
+    //const zAction* action = nullptr;
 
-    auto action = server->action(r);
-
-    if(action != nullptr)
+    if(r.status==1)
     {
-        // kiolvassuk a hívást, megtaláljuk, melyik actiont kell a tasknak átadni
-        // a task csak az actiont végrehajtja és az eredményt közli
-        // ez bekerül egy response-ba, amit a TaskResult visszaad
-
-        // ha az action minden byte-ja megjött, akkor ok, ha nem, akkor egy újabb readtoready-ben fog jönni hozzá.
-        // ha ok, akkor lesz task, ha nem, akkor wait lesz.
-
-        zActionTask *mytask = new zActionTask();
-        //QString q_str = r.url.query();
-
-        mytask->setActionFn(action->fn, r.urlparams, r.content);
-        mytask->setAutoDelete(true);
-
-        // sorba állítjuk
-        connect(mytask, SIGNAL(Result(zActionResult)), this, SLOT(TaskResult(zActionResult)), Qt::QueuedConnection);
-
-        QThreadPool::globalInstance()->start(mytask);
+        if(r.isCompleted())
+        {
+            auto action = server->action(r);
+            if(action !=nullptr)
+            {
+                startTask(r, *action);
+            }
+            else
+            {
+                notFound();
+            }
+        }
+        else
+        {
+            server->pending_requests[descriptor]=r;
+        }
     }
     else
     {
-        zResponse rs;
+        if(server->pending_requests.contains(descriptor))
+        {
+            auto r2 = server->pending_requests[descriptor];
+            r2.content+=ba;
 
-        rs.setStatus(zResponse::statusCode::NotFound);
-        rs.addHeaderField(zResponse::headerField::Server, server->serverName());
-        sendResponse(rs);
+            if(r2.isCompleted())
+            {
+                server->pending_requests.remove(descriptor);
+                auto action = server->action(r2);
+                if(action != nullptr)
+                {
+                    startTask(r2, *action);
+                }
+                else
+                {
+                    notFound();
+                }
+            }
+        }
+        else
+        {
+            zResponse rs;
+            rs.setStatus(zResponse::statusCode::OK);
+            rs.addHeaderField(zResponse::headerField::Server, server->serverName());
+            rs.addBody("");
 
+            socket->write(rs.toByteArray());
+            socket->close();
+            socket->disconnectFromHost();
+
+        }
     }
+
 }
 
 // miután a task elkészült
@@ -156,4 +146,26 @@ void zThreadedSocketHandler::sendResponse(zResponse rs){
 void zThreadedSocketHandler::trace(QString p1)
 {
     zlog.trace(LOGPATTERN.arg(socket->socketDescriptor()).arg(p1));
+}
+
+void zThreadedSocketHandler::startTask(const zRequest& r, const zAction action){
+    zActionTask *mytask = new zActionTask();
+    //QString q_str = r.url.query();
+
+    mytask->setActionFn(action.fn, r.urlparams, r.content);
+    mytask->setAutoDelete(true);
+
+    // sorba állítjuk
+    connect(mytask, SIGNAL(Result(zActionResult)), this, SLOT(TaskResult(zActionResult)), Qt::QueuedConnection);
+
+    QThreadPool::globalInstance()->start(mytask);
+}
+
+void zThreadedSocketHandler::notFound()
+{
+    zResponse rs;
+
+    rs.setStatus(zResponse::statusCode::NotFound);
+    rs.addHeaderField(zResponse::headerField::Server, server->serverName());
+    sendResponse(rs);
 }

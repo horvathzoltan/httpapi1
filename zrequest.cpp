@@ -16,13 +16,30 @@ const QString zRequest::Method::DELETE = QStringLiteral("DELETE");
 const QString zRequest::Method::TRACE = QStringLiteral("TRACE");
 const QString zRequest::Method::CONNECT = QStringLiteral("CONNECT");
 
+int zRequest::instance_counter=0;
+
 zRequest::zRequest()
 {
+    this->instance= instance_counter++;
+    //auto a  = this->toString();
+    zlog.trace(QStringLiteral("CONSTRUCT(%1)").arg(instance));//.arg(a)
+}
 
+zRequest::~zRequest()
+{
+    //auto a  = this->toString();
+    zlog.trace(QStringLiteral("DESTRUCT(%1)").arg(instance));//.arg(a)
 }
 
 zRequest::zRequest(QString r)
 {
+    this->instance= instance_counter++;
+    //auto a  = this->toString();
+    zlog.trace(QStringLiteral("CONSTRUCT(%1)2").arg(instance));//.arg(a)
+    //if(r.length()<8) {this->status=0; return;}
+    this->status=1;
+    this->content_length=-1;
+
     auto lines = r.split("\r\n");
     QString requestLine = lines[0];
 
@@ -48,6 +65,8 @@ zRequest::zRequest(QString r)
         else
         {
             zlog.error("requestLine inappropriate format");
+            this->status=0;
+            return;
         }
 
         if(lines.count()>1)
@@ -67,16 +86,18 @@ zRequest::zRequest(QString r)
                     else
                     {
                         zlog.error(QStringLiteral("there is no key: %1").arg(line));
+                        //this->status=0;
                     }
 
                 }
                 else
                 {
                     zlog.error("headerFieldLine inappropriate format");
+                    //this->status=0;
                 }
             }
         }
-    }
+    }    
 }
 
 QString zRequest::toString()
@@ -85,6 +106,21 @@ QString zRequest::toString()
     return e;
 }
 
+bool zRequest::isCompleted(){
+    auto hasBody = this->headerFields.contains("Content-Length");
+    if(hasBody)// && (r.content.isEmpty() || r.content.length()<))
+    {
+        int l = this->headerFields["Content-Length"].toInt();
+        if(this->content.length()<l)
+        {
+            //részleges request - csak a fej van meg
+            zlog.trace(QStringLiteral("partially %1 , %2").arg(l).arg(this->content.length()));
+
+            return false;
+        }
+    }
+    return true;
+}
 
 
 

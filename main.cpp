@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     // styro1
     server.addAction(zRequest::Method::GET, "/styro1/translation/getmainpagetr1", &doWork::getMainPagetr1);
     //testconnection
+    //http://horvathzoltan.theworkpc.com:8080/styro1/login/active
     server.addAction(zRequest::Method::GET, "/styro1/login/active", &doWork::testconnection);
     server.addAction(zRequest::Method::POST, "/styro1/login/login", &doWork::login);
     server.start();

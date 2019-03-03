@@ -25,8 +25,10 @@ public:
     };
 
     zRequest();
+    ~zRequest();
     zRequest(QString);
 
+    bool isCompleted();
     //Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
     QString method;
     QString URI;
@@ -35,8 +37,14 @@ public:
     QUrlQuery urlparams;
     QMap<QString, QString> headerFields;
     QByteArray content;
+    int content_length;
+    int status;
 
     QString toString();
+private:
+    int instance;
+    static int instance_counter;
 };
 
 #endif // REQUEST_H
+

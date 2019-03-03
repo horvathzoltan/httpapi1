@@ -18,12 +18,15 @@ public:
     void setSocket(qintptr Descriptor);
     void setServer(zHTTPThreadedServer *s);
     void trace(QString);
+    void startTask(const zRequest& r, const zAction action);
+    void notFound();
 //signals:
 
 public slots:
     void connected();
     void disconnected();
     void readyRead();
+
 
     // make the server fully ascynchronous
     // by doing time consuming task

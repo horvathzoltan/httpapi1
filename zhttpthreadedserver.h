@@ -20,7 +20,8 @@ public:
 
     const zAction* action(zRequest r);
     const QString serverName(void) const { return _serverName; }
-
+    //QList<zRequest> pending_requests;
+    QMap<qintptr, zRequest> pending_requests;
 protected:
     void incomingConnection(qintptr socketDescriptor);
 
@@ -28,5 +29,6 @@ protected:
     quint16 port;
     QString _serverName;
     QList<zAction> actions;
+
 };
 #endif // MYHTTPTHREADSERVER
